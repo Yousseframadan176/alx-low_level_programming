@@ -1,148 +1,78 @@
-#include "main.h"
 #include <stdlib.h>
+#include "main.h"
 
 /**
- * _print - Moves a string one place to the left and prints the string.
- * @str: String to move.
- * @l: Size of the string.
+ * count_word - Helper function to count the number of words in a string.
+ * @s: String to evaluate.
  *
- * Return: void
+ * Return: Number of words.
  */
-void _print(char *str, int l)
+int count_word(char *s)
 {
-	int i, j;
+	int flag, c, w;
 
-	i = j = 0;
-	while (i < l)
+	flag = 0;
+	w = 0;
+
+	for (c = 0; s[c] != '\0'; c++)
 	{
-		if (str[i] != '0')
-			j = 1;
-		if (j || i == l - 1)
-			_putchar(str[i]);
-		i++;
+		if (s[c] == ' ')
+			flag = 0;
+		else if (flag == 0)
+		{
+			flag = 1;
+			w++;
+		}
 	}
 
-	_putchar('\n');
-	free(str);
+	return (w);
 }
 
 /**
- * mul - Multiplies a character with a string and places the answer into dest.
- * @n: Character to multiply.
- * @num: String to multiply.
- * @num_index: Last non-NULL index of num.
- * @dest: Destination of multiplication.
- * @dest_index: Highest index to start addition.
+ * strtow - Splits a string into words.
+ * @str: String to split.
  *
- * Return: Pointer to dest, or NULL on failure.
+ * Return: Pointer to an array of strings (Success) or NULL (Error).
  */
-char *mul(char n, char *num, int num_index, char *dest, int dest_index)
+char **strtow(char *str)
 {
-	int j, k, mul, mulrem, add, addrem;
+	char **matrix, *tmp;
+	int i, k = 0, len = 0, words, c = 0, start, end;
 
-	mulrem = addrem = 0;
-	for (j = num_index, k = dest_index; j >= 0; j--, k--)
-	{
-		mul = (n - '0') * (num[j] - '0') + mulrem;
-		mulrem = mul / 10;
-		add = (dest[k] - '0') + (mul % 10) + addrem;
-		addrem = add / 10;
-		dest[k] = add % 10 + '0';
-	}
-	for (addrem += mulrem; k >= 0 && addrem; k--)
-	{
-		add = (dest[k] - '0') + addrem;
-		addrem = add / 10;
-		dest[k] = add % 10 + '0';
-	}
-	if (addrem)
-	{
+	while (*(str + len))
+		len++;
+
+	words = count_word(str);
+	if (words == 0)
 		return (NULL);
-	}
-	return (dest);
-}
 
-/**
- * check_for_digits - Checks the arguments to ensure they are digits.
- * @av: Pointer to arguments.
- *
- * Return: 0 if digits, 1 if not.
- */
-int check_for_digits(char **av)
-{
-	int i, j;
+	matrix = (char **)malloc(sizeof(char *) * (words + 1));
+	if (matrix == NULL)
+		return (NULL);
 
-	for (i = 1; i < 3; i++)
+	for (i = 0; i <= len; i++)
 	{
-		for (j = 0; av[i][j]; j++)
+		if (str[i] == ' ' || str[i] == '\0')
 		{
-			if (av[i][j] < '0' || av[i][j] > '9')
-				return (1);
+			if (c)
+			{
+				end = i;
+				tmp = (char *)malloc(sizeof(char) * (c + 1));
+				if (tmp == NULL)
+					return (NULL);
+				while (start < end)
+					*tmp++ = str[start++];
+				*tmp = '\0';
+				matrix[k] = tmp - c;
+				k++;
+				c = 0;
+			}
 		}
+		else if (c++ == 0)
+			start = i;
 	}
-	return (0);
-}
 
-/**
- * init - Initializes a string.
- * @str: String to initialize.
- * @l: Length of the string.
- *
- * Return: void
- */
-void init(char *str, int l)
-{
-	int i;
+	matrix[k] = NULL;
 
-	for (i = 0; i < l; i++)
-		str[i] = '0';
-	str[i] = '\0';
-}
-
-/**
- * main - Multiply two numbers.
- * @argc: Number of arguments.
- * @argv: Argument vector.
- *
- * Return: Zero, or exit status of 98 if failure.
- */
-int main(int argc, char *argv[])
-{
-	int l1, l2, ln, ti, i;
-	char *a;
-	char *t;
-	char e[] = "Error\n";
-
-	if (argc != 3 || check_for_digits(argv))
-	{
-		for (ti = 0; e[ti]; ti++)
-			_putchar(e[ti]);
-		exit(98);
-	}
-	for (l1 = 0; argv[1][l1]; l1++)
-		;
-	for (l2 = 0; argv[2][l2]; l2++)
-		;
-	ln = l1 + l2 + 1;
-	a = malloc(ln * sizeof(char));
-	if (a == NULL)
-	{
-		for (ti = 0; e[ti]; ti++)
-			_putchar(e[ti]);
-		exit(98);
-	}
-	init(a, ln - 1);
-	for (ti = l2 - 1, i = 0; ti >= 0; ti--, i++)
-	{
-		t = mul(argv[2][ti], argv[1], l1 - 1, a, (ln - 2) - i);
-		if (t == NULL)
-		{
-			for (ti = 0; e[ti]; ti++)
-				_putchar(e[ti]);
-			free(a);
-			exit(98);
-		}
-	}
-	_print(a, ln - 1);
-	return (0);
+	return (matrix);
 }
