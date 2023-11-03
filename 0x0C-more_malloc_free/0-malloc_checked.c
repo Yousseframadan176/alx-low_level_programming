@@ -1,7 +1,7 @@
 #include "main.h"
 
 /**
- * malloc_checked - Causes normal proces termination with a status value of 98.
+ * malloc_checked - Causes normal process termination with a status value of 98
  * @b: Allocated memory.
  *
  * Return: A pointer to the allocated memory.
